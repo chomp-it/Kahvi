@@ -117,4 +117,6 @@ The problem with preprocessors has always been wrangling the compile scripts; fo
 Hope you enjoyed. This is in active development so bugs are quite common.
 I am working to add new features and fix bugs when I can.
 
+Also see [Mojave](https://github.com/Centurion774477/Mojave), the library to turn localStorage into a psuedo-database.
+
 Cheers!
