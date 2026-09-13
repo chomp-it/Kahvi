@@ -1,7 +1,14 @@
 #!/usr/bin/env ruby
 
+require 'fileutils'
+
 def lex line
     case line
+    when /^flip\s+(?<variable>.*)$/
+      return {
+        type: :flip,
+        variable: $~[:variable]
+      }
     when /^(?<variable>.*)\s+=\s+get(?<url>.*)$/
       return {
         type: :get_request,
@@ -319,6 +326,24 @@ def generateOrisConditional token
   END
 end
 
+def generateBooleanFlip variable
+  return <<~END
+  #{variable} = !#{variable}
+  END
+end
+
+def handleCoffeeScript value
+  if value.end_with?(';')
+    return <<~END
+    `
+    #{value}
+    `
+    END
+  else
+    return value
+  end
+end
+
 $lastFunctionName = nil
 $inFunction       = false
 
@@ -334,7 +359,7 @@ def generate token
     when :type_mutation      then generateTypeMutation token
     when :aint_condition     then generateAintCondition token
     when :perform            then generatePerform token
-    when :end                then generateEnd()
+    when :end                then generateEnd
     when :kahvi_confirm      then generateKahviConfirm token
     when :alternate_function then generateAlternateFunction token
     when :get_element        then generateGetElement token
@@ -342,7 +367,8 @@ def generate token
     when :if_correct_or_bad  then generateStatusConditional token
     when :get_request        then generateGetRequest token
     when :oris_conditional   then generateOrisConditional token
-    when :coffeescript       then token[:value]
+    when :flip               then generateBooleanFlip token[:variable]
+    when :coffeescript       then handleCoffeeScript token[:value]
     end
 
     snippets << snippet
@@ -392,8 +418,21 @@ end
 
 # generate
 # this will need refactoring later. Right now it just dumps everything into one directory
-def outputPage name
-  File.open("#{name}.html", 'w') do |file|
+def outputPage name, directory
+
+  directory ||= name
+
+  path = File.join(directory, name)
+
+  if Dir.exist? file_name
+    
+  end
+
+  Dir.mkdir directory
+
+
+  FileUtils.touch("#{path}.html")
+  File.open("#{path}.html", 'w') do |file|
     file.puts <<~END
       <!DOCTYPE html>
       <html lang="en">
@@ -416,7 +455,8 @@ def outputPage name
     END
   end
 
-  File.open("#{name}.frenchpress", 'w') do |file|
+  FileUtils.touch("#{path}.frenchpress")
+  File.open("#{path}.frenchpress", 'w') do |file|
     file.puts <<~END
       # Hei! Here are some of the features of FPCS you should know:
       #
@@ -435,7 +475,8 @@ def outputPage name
     END
   end
 
-  File.open("#{name}.styl", 'w') do |file|
+  FileUtils.touch("#{path}.styl")
+  File.open("#{path}.styl", 'w') do |file|
     file.puts <<~END
       /*
       Stylus docs: https://stylus-lang.com/docs/
@@ -444,12 +485,17 @@ def outputPage name
     END
   end
 
-  File.open("french_press_master.sh", 'a') do |file|
+  master_script_path = File.join(directory, "french_press_master.sh")
+
+  FileUtils.touch(master_script_path)
+  File.open(master_script_path, 'a') do |file|
     file.puts <<~END
       fp full_send #{name}.frenchpress
       stylus #{name}.styl
     END
   end
+
+  puts "Done. Your page #{name} can be seen in the #{directory} folder. I hope you enjoy."
 end
 
 # what-is-kahvi
@@ -565,12 +611,11 @@ when 'compile'
     exit
   end
   outputCoffeeScript file_to_read_from, file_to_write_to
-when 'generate'               then outputPage file_to_read_from
-when 'what-is-kahvi'          then outputInformation()
+when 'generate'               then outputPage file_to_read_from, file_to_write_to
+when 'what-is-kahvi'          then outputInformation
 when 'typecheck', 'proofread' then outputProofReading(file_to_read_from)
 else
   puts "Invalid command: #{command}. Type 'what-is-kahvi' for help"
   exit
 end
-
 
