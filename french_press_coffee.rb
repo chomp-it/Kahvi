@@ -18,7 +18,7 @@ def lex line
         id: $~[:id],
         event_type: $~[:type]
         }
-    when /enforce\s+\'(?<id>.*)\'\s+as\s+a\s+(?<type>.*)$/
+    when /enforce\s+\'(?<id>.*)\'s\s+input\s+as\s+a\s+(?<type>.*)$/
         unless %w|string word integer number|.include?($~[:type])
           fail "Invalid type assigned to an enforce statement: #{$~[:type]} "
         end
@@ -294,6 +294,7 @@ end
 def generateGetRequest token
   function_name = camelize(token[:variable])
   return <<~END
+
     #{token[:variable]} = null
     
     #{function_name} = (url) ->
@@ -301,11 +302,11 @@ def generateGetRequest token
         response = await fetch(url)
 
         unless response.ok
-          throw new Error "Response status: ${response.status}"
+          throw new Error "Response status: \#{response.status}"
         
         #{token[:variable]} = await response.json()
         
-      catch (error)
+      catch error
         console.error(error.message)
           
     #{function_name}(#{token[:url].lstrip})
@@ -349,6 +350,14 @@ def generate token
 end
 
 def generateCoffeeScript file_to_read_from, file_to_write_to
+  unless File.exist?(file_to_read_from)
+    puts <<~END
+    Failed to locate #{file_to_read_from} in this directory.
+    Perhaps you forgot the file extension, or maybe you are in the wrong directory.
+    END
+    exit
+  end
+
   lines        = File.readlines(file_to_read_from)
   tokens       = lines.map { |line| lex line.chomp }
   snippets     = tokens.map { |token| generate token }
@@ -374,6 +383,11 @@ def outputJavaScript file_in, file_out
   generateCoffeeScript file_in, file_out
 
   `coffee --compile #{file_out}`
+
+  unless $?.success?
+    puts "Something went wrong with the coffeescript compilation process."
+    exit
+  end
 end
 
 # generate
@@ -484,7 +498,7 @@ def outputProofReading file_in
   end
   
   lines.each do |line|
-    token = lex line
+    token = lex line.chomp
     
     if token[:type] == :coffeescript
       if doubleCheck(line) == true
@@ -496,7 +510,7 @@ def outputProofReading file_in
       end
     end
   end
-  puts "Your file appears to be fine."
+  puts "Your file appears to be fine. This doesn't mean its perfect, but it's something."
   exit
 end
 
@@ -558,4 +572,5 @@ else
   puts "Invalid command: #{command}. Type 'what-is-kahvi' for help"
   exit
 end
+
 
