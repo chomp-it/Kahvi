@@ -418,14 +418,20 @@ end
 
 # generate
 # this will need refactoring later. Right now it just dumps everything into one directory
-def outputPage name, directory
+def outputPage name, directory, flag
 
   directory ||= name
 
-  path = File.join(directory, name)
+  if directory in %w|this here| then directory = "." end
 
-  if Dir.exist? file_name
+  path = File.join(directory, name).freeze
+
+  if File.exist? path
+    puts "The file #{path} already exists. Would you like to overwrite it? [Y]/[n]"
+    input = gets.chomp
     
+    return unless input == 'Y'
+
   end
 
   Dir.mkdir directory
@@ -477,15 +483,34 @@ def outputPage name, directory
 
   FileUtils.touch("#{path}.styl")
   File.open("#{path}.styl", 'w') do |file|
-    file.puts <<~END
-      /*
-      Stylus docs: https://stylus-lang.com/docs/
-      Happy styling!
-      */
-    END
+    if flag == 'omakase-style'
+      file.puts <<~END
+        /*
+        Stylus docs: https://stylus-lang.com/docs/
+        Happy styling!
+        */
+
+        html
+          background-color: #e3d8f3
+
+        textarea, input
+          font-family: Didot,Didot LT STD,Hoefler Text,Garamond,Times New Roman,serif
+        
+        h1, h2, h3, h4, h5, h6, p
+          color: #535e97;
+
+      END
+    else
+      file.puts <<~END
+        /*
+        Stylus docs: https://stylus-lang.com/docs/
+        Happy styling!
+        */
+      END
+    end
   end
 
-  master_script_path = File.join(directory, "french_press_master.sh")
+  master_script_path = File.join(directory, "french_press_master.sh").freeze
 
   FileUtils.touch(master_script_path)
   File.open(master_script_path, 'a') do |file|
@@ -574,7 +599,7 @@ end
 def checkFileToReadFrom(file_to_read_from, command)
   if file_to_read_from.nil?
     if command == "generate"
-      puts "You must provide a name for the page"
+      puts "You must provide a name for the page.\n Structure the command like this: generate <page> (inside) <directory> (optionally) omakase-style"
       exit
     elsif command == "what-is-kahvi"
       return
@@ -606,16 +631,26 @@ when 'compile'
     puts "No output file was provided."
     exit
   end
+
   unless File.extname(file_to_write_to) == '.coffee'
     puts "Your file extension must be .coffee -- you passed #{File.extname(file_to_write_to)}"
     exit
   end
+
   outputCoffeeScript file_to_read_from, file_to_write_to
-when 'generate'               then outputPage file_to_read_from, file_to_write_to
+when 'generate'
+  if file_to_write_to.nil? || file_to_write_to == "omakase-style"
+    puts "You forgot to add a directory to create this page under."
+    puts "Add a directory between #{file_to_read_from} and 'omakase-style'" if file_to_write_to == "omakase-style"
+    exit
+  end
+  
+  outputPage file_to_read_from, file_to_write_to, ARGV[3]
 when 'what-is-kahvi'          then outputInformation
 when 'typecheck', 'proofread' then outputProofReading(file_to_read_from)
 else
   puts "Invalid command: #{command}. Type 'what-is-kahvi' for help"
   exit
 end
+
 
