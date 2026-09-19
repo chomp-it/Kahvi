@@ -25,7 +25,7 @@ def lex line
         id: $~[:id],
         event_type: $~[:type]
         }
-    when /enforce\s+\'(?<id>.*)\'s\s+input\s+as\s+a\s+(?<type>.*)$/
+    when /enforce\s+\'(?<id>.*)\'s\s+input\s+as\s+(a|an)\s+(?<type>.*)$/
         unless %w|string word integer number|.include?($~[:type])
           fail "Invalid type assigned to an enforce statement: #{$~[:type]} "
         end
@@ -249,9 +249,12 @@ end
 # get saveButton
 def generateGetElement token
   variable = token[:element]
+
+  clean_variable = variable.gsub("'", "").gsub("-", "_") # remove quotes and replace hyphens with underscores
+
   element_id = variable.gsub(/([A-Z])/, '-\1').downcase
   return <<~END
-    #{variable} = document.getElementById '#{element_id}'
+    #{clean_variable} = document.getElementById #{element_id}
   END
 end
 
