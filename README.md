@@ -6,8 +6,8 @@ French Press CoffeeScript doesn't get in your way for your actual app logic; it 
 I'm just going to go down the line and show you syntax and a brief explanation. In the future, I will record a demo for French Press CoffeeScript which will be more detailed.
 
 ```coffeescript
-when ‘some-button-id’ is clicked ->
-  console.log “some button was clicked”
+when 'some-button-id' is clicked ->
+  console.log "some button was clicked"
 ```
 
 This is a shorthand for event listeners, but it also pulls down the element implicitly, cutting down on a lot of boilerplate.
@@ -16,7 +16,7 @@ Here is the CoffeeScript version:
 
 ```coffeescript
 document.getElementById('some-button-id').addEventListener 'clicked', () ->
-  console.log “some button was clicked”
+  console.log "some button was clicked"
 ```
 
 In place of 'clicked', you can also pass these other options:
@@ -29,14 +29,14 @@ In place of 'clicked', you can also pass these other options:
 Another example:
 
 ```coffeescript
-when ‘some-button-id’ is mousedover ->
+when 'some-button-id' is mousedover ->
   console.log “some button was moused over”
 ```
 
 Enforce:
 
 ```
-enforce ‘some-id' as a word
+enforce 'some-id' as a word
 ```
 
 This is a bit more magical than the first expression, but it's really just verifying input -- an action that is otherwise extremely tedious.
@@ -44,8 +44,8 @@ This is a bit more magical than the first expression, but it's really just verif
 Code speaks louder than words, however, so let me show you the CoffeeScript equivalent:
 
 ```coffeescript
-unless document.getElementById ‘some-id’.value.match /^[a-zA-Z]+$/
-  alert “input rejected: it must be a string.”
+unless document.getElementById 'some-id'.value.match /^[a-zA-Z]+$/
+  alert "input rejected: it must be a string."
   return
 ```
 
