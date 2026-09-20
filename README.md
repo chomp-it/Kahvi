@@ -208,6 +208,6 @@ I am working to add new features and fix bugs when I can.
 
 Also see [Mojave](https://github.com/Centurion774477/Mojave), a library to turn localStorage into a psuedo-database and see [Everett](https://github.com/Centurion774477/Everett), a library to make handling configs with sessionStorage easier.
 
-Both of these are part of the French Press CoffeeScript family.
+Both of these are part of the French Press CoffeeScript family, but nobody's stopping you from using them on their own.
 
 Cheers!
