@@ -30,7 +30,7 @@ Another example:
 
 ```coffeescript
 when 'some-button-id' is mousedover ->
-  console.log “some button was moused over”
+  console.log "some button was moused over"
 ```
 
 Enforce:
@@ -59,13 +59,13 @@ You can also use string as an alias to word.
 Refers to:
 
 ```coffeescript
-someButton refers to ‘some-button-id’
+someButton refers to 'some-button-id'
 ```
 
 This is really just assigning someButton to 'some-button-id'. Here's the equivalent CoffeeScript:
 
 ```coffeescript
-someButton = document.querySelector ‘some-button-id’
+someButton = document.querySelector 'some-button-id'
 ```
 
 Hide and display:
@@ -74,7 +74,7 @@ Hide and display:
 
 Evaluates to
 
-`x.style.display = ‘none’`
+`x.style.display = 'none'`
 
 And its opposite:
 
@@ -82,7 +82,7 @@ And its opposite:
 
 Evaluates to
 
-`x.style.display = ‘block’`
+`x.style.display = 'block'`
 
 Aint:
 
@@ -209,5 +209,9 @@ I am working to add new features and fix bugs when I can.
 Also see [Mojave](https://github.com/Centurion774477/Mojave), a library to turn localStorage into a psuedo-database and see [Everett](https://github.com/Centurion774477/Everett), a library to make handling configs with sessionStorage easier.
 
 Both of these are part of the French Press CoffeeScript family, but nobody's stopping you from using them on their own.
+
+P.S:
+
+this README was purified using [Murman](https://github.com/Centurion774477/Murman)
 
 Cheers!
