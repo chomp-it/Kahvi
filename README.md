@@ -1,7 +1,13 @@
 # Kahvi
 CoffeeScript on its own allows you to write apps much faster than with plain JavaScript, however, you still have to jump over verbose hurdles like `x = document.getElementById 'some-id'` or `x.addEventListener ...`. I wrote Kahvi -- nicknamed French Press CoffeeScript -- to solve these problems. And yes, the name is inspired by Ruby on Rails.
 
-French Press CoffeeScript doesn't get in your way for your actual app logic; it only helps you get there faster; there are no magical conventions over things, just faster and cleaner ways. Let's get into the actual syntax of French Press CoffeeScript.
+French Press CoffeeScript doesn't get in your way for your actual app logic; it only helps you get there faster; there are no magical conventions over things, just faster and cleaner ways. 
+
+I believe in Stating The Obvious. We are using CoffeeScript to manipulate the DOM, therefore manipulating the DOM should be painless.
+
+Most of the features of French Press CoffeeScript get straight to the point. Instead of `document.getElementById("some-id")`, You can either write `get "some-id"` or `"some-id".get()`.
+
+Let's get into the actual syntax of French Press CoffeeScript so you can see how FPCS States the Obvious.
 
 I'm just going to go down the line and show you syntax and a brief explanation. In the future, I will record a demo for French Press CoffeeScript which will be more detailed.
 
@@ -174,6 +180,56 @@ catch (error)
 
 getData("http\://localhost3000/fetch")
 ```
+
+## Methods
+
+In addition to keywords, FPCS also has some methods. The only way to access these is to use the generate command. This will copy the methods file into your directory and allow you to use them.
+
+These are all the methods:
+
+### Array Methods
+
+`Array.first 3` Returns the first three elements of an array
+
+`Array.last 3` Returns the last three elements of an array
+
+`Array.random()` Returns a random value from your array
+
+`Array.ninety_sixth()` A little easter egg
+
+`Array.reunite()` An alias for Array.join()
+
+`Array.empty()` Returns true if length is 0
+
+`Array.full()` Returns true if length isn't zero
+
+### Number Methods
+
+`Number.in_milliseconds()` Converts seconds to milliseconds
+
+`Number.in_seconds()` Converts milliseconds to seconds
+
+`Number.wait_for(-> console.log("Lapland"))` Executes a callback after a cooldown period
+
+### String methods
+
+`String.characters()` Returns an array of the characters inside a string
+
+`String.character_count()` Essentially an alias for `String.length()`
+
+`String.hide()` Hides the element in the DOM. Under the hood: `document.getElementById(<String>).style.display = 'none'`
+
+`String.display()` The opposite of `String.hide()`; displays the element in the DOM.
+
+`String.get()` Shorthand for `document.GetElementById`
+
+`String.print()` Logs the string to the console
+
+Those are all the methods. However, this file also comes with a couple utility functions:
+
+`nordicCity()` Returns a random Nordic city from Finland, Denmark, Sweden, Norway, or Iceland.
+
+`log()` Shorthand for `console.log()`
 
 # Generate
 
