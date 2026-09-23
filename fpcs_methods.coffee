@@ -1,10 +1,13 @@
 
+# returns an array containing the first n amount of elements
 Array::first = (amount) ->
   if amount is 1 then @[0] else @.slice(0, amount)
 
+# returns an array containing the last n amount of elements
 Array::last = (amount) ->
   if amount is 1 then @[@.length - 1] else @.slice(-amount)
 
+# returns a random element from your array
 Array::random = ->
   @[Math.floor(Math.random() * @.length)]
 
@@ -15,10 +18,6 @@ Array::ninety_sixth = ->
 # alias for join
 Array::reunite = ->
   @.join()
-
-# add all numbers in an array
-Array::toNumber = ->
-  Number(@join(''))
 
 # returns true if the array is empty, false otherwise
 Array::empty = ->
@@ -40,15 +39,19 @@ Number::in_seconds = ->
 Number::wait_for = (callback) ->
   setTimeout(callback, @)
 
-# alias for length
+# returns an array of the characters in the string
 String::characters = ->
+  @.split("")
+
+# alias for length
+String::character_count = ->
   @.length
 
 # hide an element
 String::hide = ->
   document.getElementById(@).style.display = 'none'
 
-# display and element
+# display an element
 String::display = ->
   document.getElementById(@).style.display = 'block'
 
