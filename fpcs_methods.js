@@ -32,8 +32,8 @@
     return this.join();
   };
 
-  // the sum of all numbers in an array
-  Array.prototype.sum = function() {
+  // add all numbers in an array
+  Array.prototype.toNumber = function() {
     return Number(this.join(''));
   };
 
@@ -44,7 +44,7 @@
 
   // returns true if the array is not empty, false otherwise
   Array.prototype.full = function() {
-    return this.length === !0;
+    return this.length !== 0;
   };
 
   // convert seconds to milliseconds
@@ -58,8 +58,8 @@
   };
 
   // set a timeout for the amount of milliseconds given
-  Number.prototype.wait_for = function(ms) {
-    return setTimeout(this, ms);
+  Number.prototype.wait_for = function(callback) {
+    return setTimeout(callback, this);
   };
 
   // alias for length

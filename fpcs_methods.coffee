@@ -16,8 +16,8 @@ Array::ninety_sixth = ->
 Array::reunite = ->
   @.join()
 
-# the sum of all numbers in an array
-Array::sum = ->
+# add all numbers in an array
+Array::toNumber = ->
   Number(@join(''))
 
 # returns true if the array is empty, false otherwise
@@ -26,7 +26,7 @@ Array::empty = ->
 
 # returns true if the array is not empty, false otherwise
 Array::full = ->
-  @.length is not 0
+  @.length isnt 0
 
 # convert seconds to milliseconds
 Number::in_milliseconds = ->
@@ -37,8 +37,8 @@ Number::in_seconds = ->
   Math.floor(@ / 1000)
 
 # set a timeout for the amount of milliseconds given
-Number::wait_for = (ms) ->
-  setTimeout(@, ms)
+Number::wait_for = (callback) ->
+  setTimeout(callback, @)
 
 # alias for length
 String::characters = ->
