@@ -15,6 +15,19 @@ def lex line
         variable: $~[:variable],
         url: $~[:url]
       }
+    when /wait\s+for\s+(?<time>\d+)\s+(?<unit>\w+)/
+      return {
+        type: :wait,
+        time: $~[:time],
+        unit: $~[:unit]
+      }
+    when /after\s+(?<time>\d+)\s+(?<unit>\w+)\s+(?<action>.*)/
+      return {
+        type: :do_after_cooldown,
+        time: $~[:time],
+        unit: $~[:unit],
+        action: $~[:action]
+      }
     when /when\s+(\'|\")\s*(?<id>[^'"]*)\s*(\'|\")\s+is\s+(?<type>\w+)\s+->$/
         unless %w|clicked submitted highlighted mousedover unhighlighted mouseoff typed typing changed|.include?($~[:type])
           fail "Invalid type assigned to an event listener: #{$~[:type]} "
@@ -130,7 +143,6 @@ def camelize(string, first_letter_upper: false)
 
   capitalized_words.join
 end
-
 
 def generateEventListener token
   event_type = token[:event_type]
@@ -335,6 +347,30 @@ def generateBooleanFlip variable
   END
 end
 
+def generateWait token
+  # convert seconds into milliseconds
+  unit = if token[:unit] in %w|second seconds|
+    token[:time] * 1000
+  end
+
+  return <<~END
+    await new Promise(wait => setTimeout(wait, #{unit}))
+  END
+end
+
+def generateDoAfterCooldown token
+  # convert seconds into milliseconds
+  unit = if token[:unit] in %w|second seconds|
+    token[:time] * 1000
+  end
+
+  return <<~END
+    setTimeout (->
+      #{token[:action]}
+    ), #{unit}
+  END
+end
+
 def handleCoffeeScript value
   if value.end_with?(';')
     return <<~END
@@ -434,7 +470,6 @@ def outputPage name, directory, flag
     input = gets.chomp
     
     return unless input == 'Y'
-
   end
 
   Dir.mkdir directory
