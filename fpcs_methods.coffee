@@ -39,6 +39,12 @@ Number::in_seconds = ->
 Number::wait_for = (callback) ->
   setTimeout(callback, @)
 
+Number::times = (callback) ->
+  callback(i) for i in [0...@]
+
+Number::zero = ->
+  @ is 0
+
 # returns an array of the characters in the string
 String::characters = ->
   @.split("")
@@ -62,6 +68,15 @@ String::get = ->
 # alias for console.log
 String::print = ->
   console.log(@)
+
+String::upcase = ->
+  @.toUpperCase()
+  
+String::downcase = ->
+  @.toLowerCase()
+
+String::blank = ->
+  @.length is 0
 
 # returns a random nordic city from Finland, Denmark, Sweden, Norway, or Iceland.
 nordicCity = ->

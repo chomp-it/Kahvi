@@ -60,6 +60,19 @@
     return setTimeout(callback, this);
   };
 
+  Number.prototype.times = function(callback) {
+    var i, j, results;
+    results = [];
+    for (i = j = 0; (0 <= this ? j < this : j > this); i = 0 <= this ? ++j : --j) {
+      results.push(callback(i));
+    }
+    return results;
+  };
+
+  Number.prototype.zero = function() {
+    return this === 0;
+  };
+
   // returns an array of the characters in the string
   String.prototype.characters = function() {
     return this.split("");
@@ -88,6 +101,18 @@
   // alias for console.log
   String.prototype.print = function() {
     return console.log(this);
+  };
+
+  String.prototype.upcase = function() {
+    return this.toUpperCase();
+  };
+
+  String.prototype.downcase = function() {
+    return this.toLowerCase();
+  };
+
+  String.prototype.blank = function() {
+    return this.length === 0;
   };
 
   // returns a random nordic city from Finland, Denmark, Sweden, Norway, or Iceland.
