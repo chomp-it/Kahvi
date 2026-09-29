@@ -45,6 +45,19 @@ Number::times = (callback) ->
 Number::zero = ->
   @ is 0
 
+# doesn't do anything but makes some statements sound better
+# such as every 3.seconds -> console.log "something"
+Number::seconds = ->
+  @valueOf()
+
+Number::through = (number) ->
+  array = []
+  for iterator in [@..number]
+    array.push(iterator)
+
+  return array
+
+
 # returns an array of the characters in the string
 String::characters = ->
   @.split("")
@@ -79,7 +92,7 @@ String::blank = ->
   @.length is 0
 
 # returns a random nordic city from Finland, Denmark, Sweden, Norway, or Iceland.
-nordicCity = ->
+window.nordicCity = ->
   cities = [
     "Helsinki",
     "Tampere",
@@ -101,5 +114,8 @@ nordicCity = ->
   return cities.random()
 
 # alias for console.log
-log = (message) ->
+window.log = (message) ->
   console.log message
+
+window.every = (time, callback) ->
+  return setInterval(callback, time)
