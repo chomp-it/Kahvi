@@ -1,5 +1,5 @@
 # Kahvi
-CoffeeScript on its own allows you to write apps much faster than with plain JavaScript, however, you still have to jump over verbose hurdles like `x = document.getElementById 'some-id'` or `x.addEventListener ...`. I wrote Kahvi -- nicknamed French Press CoffeeScript -- to solve these problems. And yes, the name is inspired by Ruby on Rails.
+CoffeeScript on its own allows you to write apps much faster than with plain JavaScript, however, you still have to jump over verbose hurdles like `x = document.getElementById 'some-id'` or `x.addEventListener ...`. I wrote Kahvi -- nicknamed French Press CoffeeScript -- to solve these problems.
 
 French Press CoffeeScript doesn't get in your way for your actual app logic; it only helps you get there faster; there are no magical conventions over things, just faster and cleaner ways. 
 
