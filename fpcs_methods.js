@@ -125,7 +125,7 @@
   };
 
   String.prototype.blank = function() {
-    return this.length === 0;
+    return this.trim() === "";
   };
 
   // returns a random nordic city from Finland, Denmark, Sweden, Norway, or Iceland.
