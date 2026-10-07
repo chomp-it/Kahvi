@@ -33,11 +33,21 @@ def lex line
           fail "Invalid type assigned to an event listener: #{$~[:type]} "
         end
 
-        return {
+        {
         type: :event_listener,
         id: $~[:id],
         event_type: $~[:type]
         }
+    when /when\s+(?<variable>.*)\s+is\s+(?<type>\w+)\s+->$/
+      unless %w|clicked submitted highlighted mousedover unhighlighted mouseoff typed typing changed|.include?($~[:type])
+          fail "Invalid type assigned to an event listener: #{$~[:type]} "
+      end
+
+      {
+        type: :variable_event_listener,
+        variable: $~[:variable],
+        event_type: $~[:type]
+      }
     when /enforce\s+\'(?<id>.*)\'s\s+input\s+as\s+(a|an)\s+(?<type>.*)$/
         unless %w|string word integer number|.include?($~[:type])
           fail "Invalid type assigned to an enforce statement: #{$~[:type]} "
@@ -128,6 +138,7 @@ def lex line
     end
 end
 
+
 def camelize(string, first_letter_upper: false)
   words = string
     .gsub(/([a-z\d])([A-Z])/, '\1 \2')
@@ -144,20 +155,23 @@ def camelize(string, first_letter_upper: false)
   capitalized_words.join
 end
 
-def generateEventListener token
-  event_type = token[:event_type]
-  coffeescript_event = case event_type
+def translateEvent oldEvent
+  return case oldEvent
   when 'clicked'                   then 'click'
   when 'submitted'                 then 'submit'
   when 'highlighted', 'mousedover' then 'mouseover'
   when 'unhighlighted', 'mouseoff' then 'mouseout'
   when 'typed', 'typing'           then 'input'
   when 'changed'                   then 'change'
-  else event_type
+  else oldEvent
   end
+end
 
+def generateEventListener token
+  event_type = token[:event_type]
+  coffeescript_event = translateEvent event_type
   return <<~END
-    document.getElementById('#{token[:id]}').addEventListener '#{coffeescript_event}', () ->
+    document.getElementById('#{token[:id]}').addEventListener '#{coffeescript_event}', ->
   END
 end
 
@@ -166,19 +180,19 @@ def generateEnforcement token
     when "string", "word"
         <<~END
         if document.getElementById('#{token[:id]}').value == '' or document.getElementById('#{token[:id]}').value == null
-          alert("Input rejected: input is empty.")
+          alert "Input rejected: input is empty."
           return
         unless document.getElementById('#{token[:id]}').value == /^[a-zA-Z]+$/
-          alert("input rejected: it must be a word.")
+          alert "input rejected: it must be a word."
           return
         END
     when "integer", "number"
         <<~END
         if document.getElementById('#{token[:id]}').value == '' or document.getElementById('#{token[:id]}').value == null
-          alert("Input rejected: input is empty.")
+          alert "Input rejected: input is empty."
           return
         unless document.getElementById('#{token[:id]}').value == /^[0-9]+$/
-          alert("input rejected: it must be a number.")
+          alert "Input rejected: it must be a number."
           return
         END
     end
@@ -349,7 +363,7 @@ end
 
 def generateWait token
   # convert seconds into milliseconds
-  unit = if token[:unit] in %w|second seconds|
+  unit = if %w|second seconds|.include? token[:unit]
     token[:time] * 1000
   end
 
@@ -360,7 +374,7 @@ end
 
 def generateDoAfterCooldown token
   # convert seconds into milliseconds
-  unit = if token[:unit] in %w|second seconds|
+  unit = if %w|second seconds|.include? token[:unit]
     token[:time] * 1000
   end
 
@@ -368,6 +382,13 @@ def generateDoAfterCooldown token
     setTimeout (->
       #{token[:action]}
     ), #{unit}
+  END
+end
+
+def generateVariableEventListener token
+  event = translateEvent token[:event_type]
+  return <<~END
+    #{token[:variable]}.addEventListener "#{event}", ->
   END
 end
 
@@ -407,6 +428,9 @@ def generate token
     when :get_request        then generateGetRequest token
     when :oris_conditional   then generateOrisConditional token
     when :flip               then generateBooleanFlip token[:variable]
+    when :variable_event_listener then generateVariableEventListener token
+    when :wait then generateWait token
+    when :do_after_cooldown then generateDoAfterCooldown token
     when :coffeescript       then handleCoffeeScript token[:value]
     end
 
@@ -456,12 +480,11 @@ def outputJavaScript file_in, file_out
 end
 
 # generate
-# this will need refactoring later. Right now it just dumps everything into one directory
 def outputPage name, directory, flag
 
   directory ||= name
 
-  if directory in %w|this here| then directory = "." end
+  if %w|this here|.include?(directory) then directory = "." end
 
   path = File.join(directory, name).freeze
 
@@ -472,8 +495,7 @@ def outputPage name, directory, flag
     return unless input == 'Y'
   end
 
-  Dir.mkdir directory
-
+  Dir.mkdir directory unless Dir.exist? directory
 
   FileUtils.touch("#{path}.html")
   File.open("#{path}.html", 'w') do |file|
@@ -553,6 +575,8 @@ def outputPage name, directory, flag
   FileUtils.touch(master_script_path)
   File.open(master_script_path, 'a') do |file|
     file.puts <<~END
+      # Hei! You can run this with 'fp go' or 'bash #{master_script_path}'
+
       fp full_send #{name}.frenchpress
       stylus #{name}.styl
     END
@@ -570,7 +594,7 @@ def outputInformation
 
 
     The other features of French Press CoffeeScript are these commands:
-    what-is-kahvi ~> you are already here
+    what-is-kahvi ~> you should know this one -- it's what got you here!
 
     generate <page> ~> scaffold a "page"; page.frenchpress, page.html, page.styl; the compilation commands are added to a masterscript
 
@@ -598,6 +622,7 @@ def doubleCheck line
   ].any? then return true else return false end
 end
 
+# proofread / typecheck
 def outputProofReading file_in
   begin
     lines = File.readlines(file_in)
@@ -621,6 +646,17 @@ def outputProofReading file_in
   end
   puts "Your file appears to be fine. This doesn't mean its perfect, but it's something."
   exit
+end
+
+master_script = "french_press_master.sh"
+# go
+def runMasterScript master_script
+  unless File.exist? master_script
+    puts "You need a master script in order to use the go command.\nYou could make one manually, or use 'generate' to scaffold one."
+    exit
+  end
+
+  `bash #{master_script}`
 end
 
 command           = ARGV[0]
@@ -649,7 +685,6 @@ def checkFileToReadFrom(file_to_read_from, command)
 end
 
 checkFileToReadFrom(file_to_read_from, command)
-
 
 case command
 when 'full_send'
@@ -686,6 +721,7 @@ when 'generate'
   outputPage file_to_read_from, file_to_write_to, ARGV[3]
 when 'what-is-kahvi'          then outputInformation
 when 'typecheck', 'proofread' then outputProofReading(file_to_read_from)
+when 'go' then runMasterScript(master_script)
 else
   puts "Invalid command: #{command}. Type 'what-is-kahvi' for help"
   exit
