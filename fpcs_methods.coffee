@@ -57,6 +57,11 @@ Number::through = (number) ->
 
   return array
 
+Number::is_even = ->
+  @ % 2 is 0
+
+Number::is_odd = ->
+  @.is_even() isnt true
 
 # returns an array of the characters in the string
 String::characters = ->

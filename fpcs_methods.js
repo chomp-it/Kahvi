@@ -86,6 +86,14 @@
     return array;
   };
 
+  Number.prototype.is_even = function() {
+    return this % 2 === 0;
+  };
+
+  Number.prototype.is_odd = function() {
+    return this.is_even() !== true;
+  };
+
   // returns an array of the characters in the string
   String.prototype.characters = function() {
     return this.split("");
