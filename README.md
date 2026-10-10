@@ -1,4 +1,35 @@
 # Kahvi
+
+```javascript
+const toggleButton = document.getElementById('lieksa-toggle-nav');
+const navElement   = document.getElementById('lieksa-nav');
+
+toggleButton.addEventListener("click", () => {
+  if (navElement.style.display === 'block') {
+	navElement.style.display = 'none';
+  } else {
+	navElement.style.display = 'block';
+  }
+});
+```
+
+Gross. That's just horrible. I had to write that for [Lieksa](https://github.com/Centurion774477/Lieksa) and hated every second of it.
+
+The equivalent French Press CoffeeScript is:
+
+```coffeescript
+toggleButton refers to 'lieksa-toggle-nav'
+navElement refers to 'lieksa-nav'
+
+when toggleButton is clicked ->
+	if navElement.style.display is 'block'
+		hide navElement
+	else
+		display navElement
+```
+
+Now that I got your attention, allow me to explain what French Press CoffeeScript is a bit more.
+
 CoffeeScript on its own allows you to write apps much faster than with plain JavaScript, however, you still have to jump over verbose hurdles like `x = document.getElementById 'some-id'` or `x.addEventListener ...`. I wrote Kahvi -- nicknamed French Press CoffeeScript -- to solve these problems.
 
 French Press CoffeeScript doesn't get in your way for your actual app logic; it only helps you get there faster; there are no magical conventions over things, just faster and cleaner ways. 
