@@ -4,131 +4,153 @@ require 'fileutils'
 
 def lex line
     case line
-    when /^flip\s+(?<variable>.*)$/
+    when /(?<indent>\s*)flip\s+(?<variable>.*)$/
       return {
         type: :flip,
-        variable: $~[:variable]
+        variable: $~[:variable],
+        indent: $~[:indent]
       }
-    when /^(?<variable>.*)\s+=\s+get(?<url>.*)$/
+    when /(?<indent>\s*)toggle_display_of (?<variable>.*)$/
+      return {
+        type: :toggle_display,
+        variable: $~[:variable],
+        indent: $~[:indent]
+      }
+    when /(?<indent>\s*)(?<variable>.*)\s+=\s+get(?<url>.*)$/
       return {
         type: :get_request,
         variable: $~[:variable],
-        url: $~[:url]
+        url: $~[:url],
+        indent: $~[:indent]
       }
-    when /wait\s+for\s+(?<time>\d+)\s+(?<unit>\w+)/
+    when /(?<indent>\s*)wait\s+for\s+(?<time>\d+)\s+(?<unit>\w+)/
       return {
         type: :wait,
         time: $~[:time],
-        unit: $~[:unit]
+        unit: $~[:unit],
+        indent: $~[:indent]
       }
-    when /after\s+(?<time>\d+)\s+(?<unit>\w+)\s+(?<action>.*)/
+    when /(?<indent>\s*)after\s+(?<time>\d+)\s+(?<unit>\w+)\s+(?<action>.*)/
       return {
         type: :do_after_cooldown,
         time: $~[:time],
         unit: $~[:unit],
-        action: $~[:action]
+        action: $~[:action],
+        indent: $~[:indent]
       }
-    when /when\s+(\'|\")\s*(?<id>[^'"]*)\s*(\'|\")\s+is\s+(?<type>\w+)\s+->$/
+    when /(?<indent>\s*)when\s+(\'|\")\s*(?<id>[^'"]*)\s*(\'|\")\s+is\s+(?<type>\w+)\s+->$/
         unless %w|clicked submitted highlighted mousedover unhighlighted mouseoff typed typing changed|.include?($~[:type])
-          fail "Invalid type assigned to an event listener: #{$~[:type]} "
+          puts "Invalid type assigned to an event listener: #{$~[:type]}"
+          exit
         end
 
         {
         type: :event_listener,
         id: $~[:id],
-        event_type: $~[:type]
+        event_type: $~[:type],
+        indent: $~[:indent]
         }
-    when /when\s+(?<variable>.*)\s+is\s+(?<type>\w+)\s+->$/
+    when /(?<indent>\s*)when\s+(?<variable>.*)\s+is\s+(?<type>\w+)\s+->$/
       unless %w|clicked submitted highlighted mousedover unhighlighted mouseoff typed typing changed|.include?($~[:type])
-          fail "Invalid type assigned to an event listener: #{$~[:type]} "
+          puts "Invalid type assigned to an event listener: #{$~[:type]} "
+          exit
       end
 
       {
         type: :variable_event_listener,
         variable: $~[:variable],
-        event_type: $~[:type]
+        event_type: $~[:type],
+        indent: $~[:indent]
       }
-    when /enforce\s+\'(?<id>.*)\'s\s+input\s+as\s+(a|an)\s+(?<type>.*)$/
+    when /(?<indent>\s*)enforce\s+\'(?<id>.*)\'s\s+input\s+as\s+(a|an)\s+(?<type>.*)$/
         unless %w|string word integer number|.include?($~[:type])
-          fail "Invalid type assigned to an enforce statement: #{$~[:type]} "
+          puts "Invalid type assigned to an enforce statement: #{$~[:type]} "
+          exit
         end
 
         return {
         type: :input_enforcement,
         id: $~[:id],
-        enforcement_type: $~[:type]
+        enforcement_type: $~[:type],
+        indent: $~[:indent]
         }
-    when /^if\s+(?<variable>.*)\s+is\s+(?<first_check>.*)\s+oris\s+(?<second_check>.*)$/
+    when /(?<indent>\s*)if\s+(?<variable>.*)\s+is\s+(?<first_check>.*)\s+oris\s+(?<second_check>.*)$/
       return {
         type: :oris_conditional,
         variable: $~[:variable],
         first_check: $~[:first_check],
-        second_check: $~[:second_check]
+        second_check: $~[:second_check],
+        indent: $~[:indent]
       }
-    when /if\s+(?<variable>.*)\s+is\s+(?<status>(correct|good|wrong|bad))/
+    when /(?<indent>\s*)(?<variable>.*)\s+refers\s+to\s+(?<id>.*)$/
       return {
-        type: :if_correct_or_bad,
+        type: :element_assignment,
         variable: $~[:variable],
-        status: $~[:status]
+        id: $~[:id],
+        indent: $~[:indent]
       }
-    when /(?<variable>.*)\s+refers\s+to\s+(?<id>.*)$/
-        return {
-            type: :element_assignment,
-            variable: $~[:variable],
-            id: $~[:id]
-        }
-    when /hide\s+(?<variable>.*)$/
-        return {
-            type: :hide,
-            variable: $~[:variable]
-        }
-    when /display\s+(?<variable>.*)$/
+    when /(?<indent>\s*)hide\s+(?<variable>.*)$/
+      return {
+        type: :hide,
+        variable: $~[:variable],
+        indent: $~[:indent]
+      }
+    when /(?<indent>\s*)display\s+(?<variable>.*)$/
     return {
         type: :display,
-        variable: $~[:variable]
+        variable: $~[:variable],
+        indent: $~[:indent]
     }
-    when /^(?<new_var>.*)\s+=\s+(?<variable>.*)\s+as\s+(a|an)\s+(?<type>.*)$/
+    when /(?<indent>\s*)(?<new_var>.*)\s+=\s+(?<variable>.*)\s+as\s+(a|an)\s+(?<type>.*)$/
       return {
         type: :type_mutation,
         variable: $~[:variable],
         new_type: $~[:type],
-        new_var: $~[:new_var]
+        new_var: $~[:new_var],
+        indent: $~[:indent]
       }
-    when /^if\s+(?<part_1>.+?)\s+aint\s+(?<part_2>.+)$/
+    when /(?<indent>\s*)if\s+(?<part_1>.+?)\s+aint\s+(?<part_2>.+)$/
       return {
         type: :aint_condition,
         condition_one: $~[:part_1],
-        condition_two: $~[:part_2]
+        condition_two: $~[:part_2],
+        indent: $~[:indent]
       }
-    when /^perform\s+(?<label>\w+)$/
+    when /(?<indent>\s*)perform\s+(?<label>\w+)$/
       return {
         type: :perform,
-        label: $~[:label]
+        label: $~[:label],
+        indent: $~[:indent]
       }
-    when /^end$/
+    when /(?<indent>\s*)end$/
       return {
-        type: :end
+        type: :end,
+        indent: $~[:indent]
       }
-    when /kahvi_confirm\s+(?<message>.*)$/
+    when /(?<indent>\s*)kahvi_confirm\s+(?<message>.*)$/
       return {
         type: :kahvi_confirm,
-        message: $~[:message]
+        message: $~[:message],
+        indent: $~[:indent]
       }
-    when /(?<function_name>.*)\s+does$/
+    when /(?<indent>\s*)(?<function_name>.*)\s+does$/
       return {
         type: :alternate_function,
-        name: $~[:function_name]
+        name: $~[:function_name],
+        indent: $~[:indent]
       }
-    when /get\s+(?<element>.*)/
+    when /(?<indent>\s*)get\s+(?<element>.*)/
       return {
         type: :get_element,
-        element: $~[:element]
+        element: $~[:element],
+        indent: $~[:indent]
       }
-    when /^(?<variable>.*)\s+=\s+right\s+now\s+in\s+(?<type>(hours|minutes|seconds|full))/
+    when /(?<indent>\s*)(?<variable>.*)\s+=\s+right\s+now\s+in\s+(?<type>(hours|minutes|seconds|full))/
       return {
         type: :right_now,
         time: $~[:type],
-        variable: $~[:variable]
+        variable: $~[:variable],
+        indent: $~[:indent]
       }
     else
       return {
@@ -171,10 +193,11 @@ def generateEventListener token
   event_type = token[:event_type]
   coffeescript_event = translateEvent event_type
   return <<~END
-    document.getElementById('#{token[:id]}').addEventListener '#{coffeescript_event}', ->
+    #{token[:indent]}document.getElementById('#{token[:id]}').addEventListener '#{coffeescript_event}', ->
   END
 end
 
+# REWRITE THIS!!!!!!!!!!!!
 def generateEnforcement token
     snippet = case token[:enforcement_type]
     when "string", "word"
@@ -199,33 +222,34 @@ def generateEnforcement token
   return snippet
 end
 
+
 def generateElementAssignment token
   return <<~END
-    #{token[:variable]} = document.getElementById #{token[:id]}
+    #{token[:indent]}#{token[:variable]} = document.getElementById #{token[:id]}
   END
 end
 
 def generateHideElement token
   return <<~END
-    #{token[:variable]}.style.display = 'none'
+    #{token[:indent]}#{token[:variable]}.style.display = 'none'
   END
 end
 
 def generateDisplayElement token
   return <<~END
-    #{token[:variable]}.style.display = 'block'
+    #{token[:indent]}#{token[:variable]}.style.display = 'block'
   END
 end
 
 def generateTypeMutation token
   return <<~END
-    #{token[:new_var]} = #{token[:new_type].capitalize}(#{token[:variable]})
+    #{token[:indent]}#{token[:new_var]} = #{token[:new_type].capitalize}(#{token[:variable]})
   END
 end
 
 def generateAintCondition token
   return <<~END
-    if #{token[:condition_one]} isnt #{token[:condition_two]}
+    #{token[:indent]}if #{token[:condition_one]} isnt #{token[:condition_two]}
   END
 end
 
@@ -233,11 +257,11 @@ def generatePerform token
   $inFunction = true
   $lastFunctionName = token[:label]
   return <<~END
-    #{token[:label]} = () ->
+    #{token[:indent]}#{token[:label]} = () ->
   END
 end
 
-def generateEnd
+def generateEnd token
   unless $inFunction
     puts "Unexpected end"
     exit
@@ -251,7 +275,7 @@ def generateEnd
   $inFunction = false
 
   snippet = <<~END
-    #{$lastFunctionName}()
+    #{token[:indent]}#{$lastFunctionName}()
   END
 
   $lastFunctionName = nil
@@ -260,15 +284,15 @@ end
 
 def generateKahviConfirm token
   return <<~END
-    unless confirm(#{token[:message]})
-      return
+    #{token[:indent]}unless confirm(#{token[:message]})
+      #{token[:indent]}  return
   END
 end
 
 # eventually add a way to add arguments to these functions
 def generateAlternateFunction token
   return <<~END
-    #{token[:name]} = () ->
+    #{token[:indent]}#{token[:name]} = () ->
   END
 end
 
@@ -280,7 +304,7 @@ def generateGetElement token
 
   element_id = variable.gsub(/([A-Z])/, '-\1').downcase
   return <<~END
-    #{clean_variable} = document.getElementById #{element_id}
+    #{token[:indent]}#{clean_variable} = document.getElementById #{element_id}
   END
 end
 
@@ -312,25 +336,9 @@ def generateRightNow token
   end
 end
 
-def generateStatusConditional token
-  variable = token[:variable]
-
-  return case token[:status]
-  when 'correct', 'good'
-    <<~END
-    if #{variable} isnt "" and #{variable} isnt null
-    END
-  when 'wrong', 'bad'
-    <<~END
-    if #{variable} is "" or #{variable} is null
-    END
-  end
-end
-
 def generateGetRequest token
   function_name = camelize(token[:variable])
   return <<~END
-
     #{token[:variable]} = null
     
     #{function_name} = (url) ->
@@ -351,13 +359,14 @@ end
 
 def generateOrisConditional token
   return <<~END
-    if #{token[:variable]} is #{token[:first_check]} or #{token[:variable]} is #{token[:second_check]}
+    #{token[:indent]}if #{token[:variable]} is #{token[:first_check]} or #{token[:variable]} is #{token[:second_check]}
   END
 end
 
-def generateBooleanFlip variable
+def generateBooleanFlip token
+  variable = token[:variable]
   return <<~END
-  #{variable} = !#{variable}
+  #{token[:indent]}#{variable} = !#{variable}
   END
 end
 
@@ -368,7 +377,7 @@ def generateWait token
   end
 
   return <<~END
-    await new Promise(wait => setTimeout(wait, #{unit}))
+    #{token[:indent]}await new Promise(wait => setTimeout(wait, #{unit}))
   END
 end
 
@@ -379,25 +388,43 @@ def generateDoAfterCooldown token
   end
 
   return <<~END
-    setTimeout (->
-      #{token[:action]}
-    ), #{unit}
+    #{token[:indent]}setTimeout (->
+      #{token[:indent]}  #{token[:action]}
+    #{token[:indent]}), #{unit}
   END
 end
 
 def generateVariableEventListener token
   event = translateEvent token[:event_type]
   return <<~END
-    #{token[:variable]}.addEventListener "#{event}", ->
+    #{token[:indent]}#{token[:variable]}.addEventListener "#{event}", ->
   END
 end
+
+def generateToggleDisplay token
+  variable = token[:variable]
+  indentation = token[:indent]
+
+  # if the variable is an ID
+  # REVISIT THIS
+  if variable.include?("'") || variable.include?('"')
+  else
+    <<~END
+      #{indentation}if #{variable}.style.display is 'block'
+        #{indentation}  #{variable}.style.display = 'none'
+      #{indentation}else
+        #{indentation}  #{variable}.style.display = 'block'
+    END
+  end
+end
+
 
 def handleCoffeeScript value
   if value.end_with?(';')
     return <<~END
-    `
-    #{value}
-    `
+    #{indentation}`
+    #{indentation}#{value}
+    #{indentation}`
     END
   else
     return value
@@ -419,23 +446,22 @@ def generate token
     when :type_mutation      then generateTypeMutation token
     when :aint_condition     then generateAintCondition token
     when :perform            then generatePerform token
-    when :end                then generateEnd
+    when :end                then generateEnd token
     when :kahvi_confirm      then generateKahviConfirm token
     when :alternate_function then generateAlternateFunction token
     when :get_element        then generateGetElement token
     when :right_now          then generateRightNow token
-    when :if_correct_or_bad  then generateStatusConditional token
     when :get_request        then generateGetRequest token
     when :oris_conditional   then generateOrisConditional token
-    when :flip               then generateBooleanFlip token[:variable]
+    when :flip               then generateBooleanFlip token
     when :variable_event_listener then generateVariableEventListener token
-    when :wait then generateWait token
-    when :do_after_cooldown then generateDoAfterCooldown token
-    when :coffeescript       then handleCoffeeScript token[:value]
+    when :wait                    then generateWait token
+    when :do_after_cooldown       then generateDoAfterCooldown token
+    when :toggle_display          then generateToggleDisplay token
+    when :coffeescript            then handleCoffeeScript token[:value]
     end
 
     snippets << snippet
-    return snippets
 end
 
 def generateCoffeeScript file_to_read_from, file_to_write_to
@@ -447,11 +473,14 @@ def generateCoffeeScript file_to_read_from, file_to_write_to
     exit
   end
 
-  lines        = File.readlines(file_to_read_from)
-  tokens       = lines.map { |line| lex line.chomp }
-  snippets     = tokens.map { |token| generate token }
+  lines    = File.readlines(file_to_read_from)
+  tokens   = lines.map { |line| lex line.chomp }
+  snippets = tokens.map { |token| generate token }
 
-  if file_to_write_to.nil? then fail "You must provide an output file." end
+  if file_to_write_to.nil?
+    puts "You must provide an output file."
+    exit
+  end
 
   File.open(file_to_write_to, 'w') do |file|
     file.puts "# Generated by French Press CoffeeScript"
@@ -479,8 +508,31 @@ def outputJavaScript file_in, file_out
   end
 end
 
+FPCS_METHODS = "fpcs_methods.js"
+
+def copyMethods(into:)
+  path = File.join(into, FPCS_METHODS)
+
+  FileUtils.mkdir_p(into)
+  methods = File.read "#{__dir__}/fpcs_methods.js"
+
+  File.open(path, 'w') do |file|
+    file.puts methods
+  end
+end
+
 # generate
 def outputPage name, directory, flag
+  added_methods = false
+  unless File.exist? FPCS_METHODS
+    puts "Do you want the French Press methods copied into your directory? [Y/n]"
+    print "~>  "
+    input = STDIN.gets.chomp
+
+    if input == "Y" then copyMethods into: directory end
+    
+    added_methods = true
+  end
 
   directory ||= name
 
@@ -489,15 +541,15 @@ def outputPage name, directory, flag
   path = File.join(directory, name).freeze
 
   if File.exist? path
-    puts "The file #{path} already exists. Would you like to overwrite it? [Y]/[n]"
-    input = gets.chomp
+    puts "The file #{path} already exists. Would you like to overwrite it? [Y/n]"
+    input = STDIN.gets.chomp
     
-    return unless input == 'Y'
+    return unless input.downcase == 'y'
   end
 
   Dir.mkdir directory unless Dir.exist? directory
 
-  FileUtils.touch("#{path}.html")
+  FileUtils.touch "#{path}.html"
   File.open("#{path}.html", 'w') do |file|
     file.puts <<~END
       <!DOCTYPE html>
@@ -515,9 +567,19 @@ def outputPage name, directory, flag
 
       <h1>#{name.capitalize}</h1>
 
-      <script src="#{name}.js"></script>
-      </body>
-      </html>
+
+    END
+
+    if added_methods
+      file.puts <<~END
+        <script src="#{FPCS_METHODS}"></script>
+      END
+    end
+
+    file.puts <<~END
+    <script src="#{name}.js"></script>
+    </body>
+    </html>
     END
   end
 
@@ -591,18 +653,19 @@ def outputInformation
     Kahvi -- French Press CoffeeScript -- is a CoffeeScript preprocessor.
 
     I'm not going to explain the syntax here, but you can see it in the GitHub repo: https://github.com/Centurion774477/Kahvi
+    If you generate a page using the generate command, you will get a couple examples included.
 
 
     The other features of French Press CoffeeScript are these commands:
     what-is-kahvi ~> you should know this one -- it's what got you here!
 
-    generate <page> ~> scaffold a "page"; page.frenchpress, page.html, page.styl; the compilation commands are added to a masterscript
+    generate <page> <directory> ~> scaffold a "page"; page.frenchpress, page.html, page.styl; the compilation commands are added to a masterscript
 
-    typecheck/proofread ~> check for any possible typos in your French Press CoffeeScript. Note that this may not be very accurate.
+    typecheck/proofread <your_file> ~> check for any possible typos in your French Press CoffeeScript. Note that this may not be very accurate.
 
-    full_send ~> compile a .frenchpress file into JavaScript
+    full_send <your_file> <new_file> ~> compile a .frenchpress file into JavaScript
 
-    compile ~> compile a .frenchpress file into CoffeeScript. Note: I tried my best to make the generated CoffeeScript as human-readable as possible.
+    compile <your_file> <new_file> ~> compile a .frenchpress file into CoffeeScript.
 
     
     I hope French Press CoffeeScript can make coding a bit more fun for you. Cheers!
@@ -624,8 +687,13 @@ end
 
 # proofread / typecheck
 def outputProofReading file_in
+  if file_in.nil?
+    puts "Please provide a file to proofread."
+    exit
+  end
+
   begin
-    lines = File.readlines(file_in)
+    lines = File.readlines file_in
   rescue
     puts "An error occured while trying to read from #{file_in}".
     exit
@@ -659,6 +727,32 @@ def runMasterScript master_script
   `bash #{master_script}`
 end
 
+
+def compileFrenchView file
+  begin
+    lines = File.readlines file
+  rescue Errno::ENOENT
+    puts "failed to read file: #{file}"
+    exit
+  end
+
+
+  inside_script = false
+  new_lines = []
+
+  lines.each do |line|
+    inside_script = true if line =~ /<frenchpress>/
+
+    if line =~ /<\/frenchpress>/
+      inside_script = false
+    elsif inside_script
+      line = lex
+    else
+      new_lines << line
+    end
+  end
+end
+
 command           = ARGV[0]
 file_to_read_from = ARGV[1]
 file_to_write_to  = ARGV[2]
@@ -668,12 +762,10 @@ if command.nil?
   exit
 end
 
-
-
 def checkFileToReadFrom(file_to_read_from, command)
   if file_to_read_from.nil?
     if command == "generate"
-      puts "You must provide a name for the page.\n Structure the command like this: generate <page> (inside) <directory> (optionally) omakase-style"
+      puts "You must provide a name for the page.\n Structure the command like this: generate <page> <directory> (optionally:) omakase-style"
       exit
     elsif command == "what-is-kahvi"
       return
