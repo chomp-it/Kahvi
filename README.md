@@ -28,15 +28,11 @@ Now that I got your attention, allow me to explain what French Press CoffeeScrip
 
 CoffeeScript on its own allows you to write apps much faster than with plain JavaScript, however, you still have to jump over verbose hurdles like `x = document.getElementById 'some-id'` or `x.addEventListener ...`. I wrote Kahvi -- nicknamed French Press CoffeeScript -- to solve these problems.
 
-French Press CoffeeScript doesn't get in your way for your actual app logic; it only helps you get there faster; there are no magical conventions over things, just faster and cleaner ways. 
-
 I believe in Stating The Obvious. We are using CoffeeScript to manipulate the DOM, therefore manipulating the DOM should be painless.
 
-Most of the features of French Press CoffeeScript get straight to the point. Instead of `document.getElementById("some-id")`, You can either write `get "some-id"` or `"some-id".get()`.
+Most of the features of French Press CoffeeScript get straight to the point. Instead of `const someElement = document.getElementById("some-id")`, You can either write `get "some-id"` or `someElement refers to 'some-id'`
 
 Let's get into the actual syntax of French Press CoffeeScript so you can see how FPCS States the Obvious.
-
-I'm just going to go down the line and show you syntax and a brief explanation. In the future, I will record a demo for French Press CoffeeScript which will be more detailed.
 
 ```coffeescript
 when 'some-button-id' is clicked ->
@@ -64,6 +60,13 @@ Another example:
 ```coffeescript
 when 'some-button-id' is mousedover ->
   console.log "some button was moused over"
+```
+
+You can also use a variable if you wish:
+
+```
+when someButton is changed ->
+	console.log "some button was changed"
 ```
 
 Enforce:
@@ -101,6 +104,22 @@ This is really just assigning someButton to 'some-button-id'. Here's the equival
 someButton = document.querySelector 'some-button-id'
 ```
 
+Get
+
+Get is somewhat magical: you don't explicitly declare the variable. Consider this:
+
+```
+get 'some-button'
+```
+
+Now you can refer to `someButton` as a variable!
+
+It generates:
+
+```
+someButton = document.getElementById 'some-button'
+```
+
 Hide and display:
 
 `hide x`
@@ -117,36 +136,11 @@ Evaluates to
 
 `x.style.display = 'block'`
 
-Aint:
+toggle_display_of
 
-This is really simple. In place of `isnt` in conditionals, you can use `aint`. It's quite an esoteric feature but you might enjoy it.
+If you want the display of an element to be toggled, then use this instead of using `hide` and `display` with a conditional:
 
-```
-if x aint "y"
-  console.log "x isnt y"
-```
-
-As a/an:
-
-This is used for type coercion. Instead of using String(foo), you would use:
-
-```
-foo as a string
-```
-
-You can also use an instead of a. The compiler won't correct your grammar, but you should do whats right.
-
-```
-foo as an integer
-```
-
-oris:
-
-This is a shortened way of using or; instead of writing `if x is y or x is z`, you can write:
-
-```
-if x is y oris z
-```
+`toggle_display_of element`
 
 Right now:
 
@@ -223,16 +217,6 @@ String.blank: `"".blank`
 Number.between(a, b): `(1999).between(1704, 2004)`
 
 Array.random: `cities.random`
-
-
-
-### Number Methods
-
-`Number.in_milliseconds()` Converts seconds to milliseconds
-
-`Number.in_seconds()` Converts milliseconds to seconds
-
-`Number.wait_for(-> console.log("Lapland"))` Executes a callback after a cooldown period
 
 # Generate
 
