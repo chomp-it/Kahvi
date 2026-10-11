@@ -18,14 +18,10 @@ Gross. That's just horrible. I had to write that for [Lieksa](https://github.com
 The equivalent French Press CoffeeScript is:
 
 ```coffeescript
-toggleButton refers to 'lieksa-toggle-nav'
 navElement refers to 'lieksa-nav'
 
-when toggleButton is clicked ->
-	if navElement.style.display is 'block'
-		hide navElement
-	else
-		display navElement
+when 'lieksa-toggle-nav' is clicked ->
+	toggle_display_of navElement
 ```
 
 Now that I got your attention, allow me to explain what French Press CoffeeScript is a bit more.
