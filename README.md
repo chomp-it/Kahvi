@@ -233,6 +233,10 @@ Outputs:
 - blog.styl
 - blog.frenchpress
 
+If you haven't heard of Stylus, you can check it out [here](https://stylus-lang.com/).
+In short, it's like sass but even simpler; you can even omit the colons and write:
+`color red`
+
 And it appends this to your master script:
 ```
 fp full_send blog.frenchpress
