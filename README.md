@@ -212,23 +212,19 @@ getData("http\://localhost3000/fetch")
 
 In addition to keywords, FPCS also has some methods. The only way to access these is to use the generate command. This will copy the methods file into your directory and allow you to use them.
 
-These are all the methods:
+Here are some of the notable methods:
 
-### Array Methods
+String.either(a, b): `city.either("Helsinki", "Tampere")`
 
-`Array.first 3` Returns the first three elements of an array
+String.character_count: `"Denmark".character_count`
 
-`Array.last 3` Returns the last three elements of an array
+String.blank: `"".blank`
 
-`Array.random()` Returns a random value from your array
+Number.between(a, b): `(1999).between(1704, 2004)`
 
-`Array.ninety_sixth()` A little easter egg
+Array.random: `cities.random`
 
-`Array.reunite()` An alias for Array.join()
 
-`Array.empty()` Returns true if length is 0
-
-`Array.full()` Returns true if length isn't zero
 
 ### Number Methods
 
@@ -237,26 +233,6 @@ These are all the methods:
 `Number.in_seconds()` Converts milliseconds to seconds
 
 `Number.wait_for(-> console.log("Lapland"))` Executes a callback after a cooldown period
-
-### String methods
-
-`String.characters()` Returns an array of the characters inside a string
-
-`String.character_count()` Essentially an alias for `String.length()`
-
-`String.hide()` Hides the element in the DOM. Under the hood: `document.getElementById(<String>).style.display = 'none'`
-
-`String.display()` The opposite of `String.hide()`; displays the element in the DOM.
-
-`String.get()` Shorthand for `document.GetElementById`
-
-`String.print()` Logs the string to the console
-
-Those are all the methods. However, this file also comes with a couple utility functions:
-
-`nordicCity()` Returns a random Nordic city from Finland, Denmark, Sweden, Norway, or Iceland.
-
-`log()` Shorthand for `console.log()`
 
 # Generate
 
@@ -292,8 +268,6 @@ I am working to add new features and fix bugs when I can.
 Also see [Mojave](https://github.com/Centurion774477/Mojave), a library to turn localStorage into a psuedo-database and see [Everett](https://github.com/Centurion774477/Everett), a library to make handling configs with sessionStorage easier.
 
 Both of these are part of the French Press CoffeeScript family, but nobody's stopping you from using them on their own.
-
-P.S:
 
 this README was purified using [Murman](https://github.com/Centurion774477/Murman)
 
