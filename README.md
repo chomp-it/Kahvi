@@ -222,13 +222,15 @@ Array.random: `cities.random`
 
 This is the other side of French Press CoffeeScript: it is used to scaffold files.
 
-Right now, the only function is to create a "page" -- which consists of a .frenchpress file,  a .styl (Stylus), and an HTML file.
+Generate is used to create a "page", which consists of a .frenchpress file,  a .styl (Stylus), and an HTML file.
 
 Here's how it looks:
 
-`fp generate blog`
+`fp generate blog blogs`
 
-Outputs:
+this is saying: "generate a blog page inside the blogs directory".
+
+Outputs (inside of blogs):
 - blog.html
 - blog.styl
 - blog.frenchpress
